@@ -1,60 +1,142 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
+	"log"
 	"net/http"
+	"net/http/cookiejar"
+	"net/url"
+	"os"
+	"strconv"
 
-	"github.com/hn275/uvic-api/cookies"
+	"github.com/valyala/fastjson"
 )
 
-const (
-	URL string = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_subject=CSC&txt_term=202301&txt_courseNumber=&startDatePicker=&endDatePicker=&pageOffset=0&pageMaxSize=1000&sortColumn=subjectDescription&sortDirection=asc"
-)
+const baseURL = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
+const maxSize = 500
 
 func main() {
-	sessionCookies := cookies.GetSessionCookie("202301")
-	fmt.Println(sessionCookies)
-	/*
-		prints out:
-			[
-			JSESSIONID=4A8A7BDAA1C9FD9EFE9F9818F9780E40;
-			Path=/StudentRegistrationSsb;
-			HttpOnly;
-			Secure;
-			SameSite=Lax
+	log := log.New(os.Stderr, "", 0)
 
-			UVicPMember=!0vNLws/WbQTvacSlixZN9qU1tuJxXrQfdHWeGgPCgseyAtxMu9EQ+PQU0/ActuGVOqC3STEfHhN26Ek=;
-			Path=/;
-			HttpOnly;
-			Secure
-			]
-	*/
+	if len(os.Args) != 2 {
+		log.Fatalf(""+
+			"Usage: %v <TERM>\n"+
+			"TERM is of the form YYYYMM, like 202205\n",
+			os.Args[0])
+	}
 
-	req, err := http.NewRequest("GET", URL, nil)
+	jar, err := cookiejar.New(nil)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
+	}
+	c := &http.Client{Jar: jar}
+
+	postURL(c, "term/search", map[string]string{
+		"mode": "search",
+	}, "application/x-www-form-urlencoded", "term="+os.Args[1])
+
+	i := 0
+	sections := make([]JSONValue, 0)
+	totalSectionCount := "unknown"
+
+	log.Printf("\rProgress: %v/%v", 0, totalSectionCount)
+	for {
+		b, err := getURL(c, "searchResults/searchResults", map[string]string{
+			"txt_term":    os.Args[1],
+			"pageOffset":  strconv.Itoa(i * maxSize),
+			"pageMaxSize": "500",
+		})
+		if err != nil {
+			log.Println(err)
+			break
+		}
+
+		jsonResponse, err := fastjson.ParseBytes(b)
+		if err != nil {
+			log.Println(err)
+			break
+		}
+
+		totalSectionCount := strconv.Itoa(jsonResponse.GetInt("sectionsFetchedCount"))
+
+		data := jsonResponse.Get("data").GetArray()
+		count := len(data)
+		if count == 0 {
+			break
+		}
+
+		for _, v := range data {
+			sections = append(sections, JSONValue{Value: v})
+		}
+
+		i++
+		log.Printf("\rProgress: %v/%v", len(sections), totalSectionCount)
 	}
 
-	client := http.Client{}
-
-	for _, cookie := range sessionCookies {
-		req.AddCookie(cookie)
-	}
-
-	res, err := client.Do(req)
+	b, err := json.MarshalIndent(sections, "", "  ")
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
-	defer res.Body.Close()
+	fmt.Println(string(b))
 
-	buf, _ := io.ReadAll(res.Body)
-	jsonRes := make(map[string]interface{})
+	os.WriteFile("./data.json", b, 0666)
+}
 
-	if err := json.Unmarshal(buf, &jsonRes); err != nil {
-		panic(err)
+func getURL(c *http.Client, path string, query map[string]string) ([]byte, error) {
+	reqURL, err := url.Parse(baseURL + path)
+	if err != nil {
+		return nil, err
 	}
 
-	fmt.Println(jsonRes)
+	setQuery(reqURL, query)
+
+	resp, err := c.Get(reqURL.String())
+	if err != nil {
+		return nil, err
+	}
+
+	b := readBody(resp)
+	return b, nil
+}
+
+func postURL(c *http.Client, path string, query map[string]string, contentType string, body string) ([]byte, error) {
+	reqURL, err := url.Parse(baseURL + path)
+	if err != nil {
+		return nil, err
+	}
+
+	setQuery(reqURL, query)
+
+	resp, err := c.Post(reqURL.String(), contentType, bytes.NewBufferString(body))
+	if err != nil {
+		return nil, err
+	}
+
+	b := readBody(resp)
+	return b, nil
+}
+
+func readBody(resp *http.Response) []byte {
+	b := bytes.Buffer{}
+	b.ReadFrom(resp.Body)
+	return b.Bytes()
+}
+
+func setQuery(u *url.URL, query map[string]string) {
+	out := make(url.Values)
+	for k, v := range query {
+		out[k] = []string{v}
+	}
+	u.RawQuery = out.Encode()
+}
+
+// because fastjson does't implement json.Marshaller
+type JSONValue struct {
+	Value *fastjson.Value
+}
+
+func (j *JSONValue) MarshalJSON() ([]byte, error) {
+	return j.Value.MarshalTo(nil), nil
 }
