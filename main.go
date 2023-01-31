@@ -3,39 +3,33 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/valyala/fastjson"
 )
 
-const baseURL = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
-const maxSize = 500
+const BASE = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
+const MAX_SIZE = 500
+const TERM = "202301"
 
 func main() {
-	log := log.New(os.Stderr, "", 0)
 
-	if len(os.Args) != 2 {
-		log.Fatalf(""+
-			"Usage: %v <TERM>\n"+
-			"TERM is of the form YYYYMM, like 202205\n",
-			os.Args[0])
-	}
+	startTime := time.Now()
+	log.Printf("fetching uvic data for term %s\n", TERM)
 
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	c := &http.Client{Jar: jar}
+	c := http.Client{Jar: jar}
 
-	postURL(c, "term/search", map[string]string{
-		"mode": "search",
-	}, "application/x-www-form-urlencoded", "term="+os.Args[1])
+	setTerm(&c)
 
 	i := 0
 	sections := make([]JSONValue, 0)
@@ -43,9 +37,9 @@ func main() {
 
 	log.Printf("\rProgress: %v/%v", 0, totalSectionCount)
 	for {
-		b, err := getURL(c, "searchResults/searchResults", map[string]string{
-			"txt_term":    os.Args[1],
-			"pageOffset":  strconv.Itoa(i * maxSize),
+		b, err := getURL(&c, "searchResults/searchResults", map[string]string{
+			"txt_term":    TERM,
+			"pageOffset":  strconv.Itoa(i * MAX_SIZE),
 			"pageMaxSize": "500",
 		})
 		if err != nil {
@@ -60,6 +54,7 @@ func main() {
 		}
 
 		totalSectionCount := strconv.Itoa(jsonResponse.GetInt("sectionsFetchedCount"))
+		// TODO: since i get this right here, the following request should be in go routine
 
 		data := jsonResponse.Get("data").GetArray()
 		count := len(data)
@@ -79,13 +74,17 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(string(b))
 
-	os.WriteFile("./data.json", b, 0666)
+	if err := os.WriteFile("./data.json", b, 0666); err != nil {
+		log.Fatal(err)
+	}
+
+	timeElapsed := time.Since(startTime)
+	log.Printf("done in %v", timeElapsed)
 }
 
 func getURL(c *http.Client, path string, query map[string]string) ([]byte, error) {
-	reqURL, err := url.Parse(baseURL + path)
+	reqURL, err := url.Parse(BASE + path)
 	if err != nil {
 		return nil, err
 	}
@@ -101,15 +100,16 @@ func getURL(c *http.Client, path string, query map[string]string) ([]byte, error
 	return b, nil
 }
 
-func postURL(c *http.Client, path string, query map[string]string, contentType string, body string) ([]byte, error) {
-	reqURL, err := url.Parse(baseURL + path)
+func setTerm(c *http.Client) ([]byte, error) {
+	reqURL, err := url.Parse(BASE + "term/search")
 	if err != nil {
 		return nil, err
 	}
 
-	setQuery(reqURL, query)
+	setQuery(reqURL, map[string]string{"mode": "search"})
 
-	resp, err := c.Post(reqURL.String(), contentType, bytes.NewBufferString(body))
+	contentType := "application/x-www-form-urlencoded"
+	resp, err := c.Post(reqURL.String(), contentType, bytes.NewBufferString("term="+TERM))
 	if err != nil {
 		return nil, err
 	}
