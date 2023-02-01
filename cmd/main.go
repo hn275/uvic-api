@@ -29,7 +29,7 @@ func main() {
 	}
 	c := http.Client{Jar: jar}
 
-	setTerm(&c)
+	startSession(&c)
 
 	i := 0
 	sections := make([]JSONValue, 0)
@@ -100,7 +100,7 @@ func getURL(c *http.Client, path string, query map[string]string) ([]byte, error
 	return b, nil
 }
 
-func setTerm(c *http.Client) ([]byte, error) {
+func startSession(c *http.Client) ([]byte, error) {
 	reqURL, err := url.Parse(BASE + "term/search")
 	if err != nil {
 		return nil, err
