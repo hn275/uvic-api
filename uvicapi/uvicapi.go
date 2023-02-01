@@ -5,72 +5,54 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"strconv"
 )
 
 type UVicAPI struct {
 	http.Client
+	QueryParam UVicQueryParams
+}
+
+type UVicQueryParams struct {
+	Subject      string // ie: "CSC"
+	Term         string // ie: "202301"
+	CourseNumber string // ie: "225"
+	Offset       int
+	Max          int // ie: max 500
+}
+
+type UVicAPIError struct {
+	error
+	StatusCode int
 }
 
 const BASE = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
-const MAX_SIZE = 500
+const MAX_SIZE = 0
 
-func NewClient() (*UVicAPI, error) {
+func NewAPI(term string) (*UVicAPI, error) {
 	cookieJar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	c := UVicAPI{}
-	c.Client.Jar = cookieJar
+	var c UVicAPI
+	c.Jar = cookieJar
 
-	return &c, nil
-}
-
-func (c *UVicAPI) GetSections(term string, offset int) ([]byte, error) {
-	reqUrl, err := url.Parse(BASE + "searchResults/searchResults")
-	if err != nil {
-		return nil, err
-	}
-
-	setQuery(reqUrl, map[string]string{
-		"txt_term":    term,
-		"pageOffset":  strconv.Itoa((offset + 1) * MAX_SIZE),
-		"pageMaxSize": strconv.Itoa(MAX_SIZE),
-	})
-
-	res, err := c.Get(reqUrl.String())
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-
-	var buf bytes.Buffer
-
-	_, err = buf.ReadFrom(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
-}
-
-func (c *UVicAPI) SetTerm(term string) error {
 	requestUrl, err := url.Parse(BASE + "term/search")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	setQuery(requestUrl, map[string]string{"mode": "search"})
 
 	contentType := "application/x-www-form-urlencoded"
-	reqBody := bytes.NewBufferString("term=" + term)
+	body := bytes.NewBufferString("term=" + term)
 
-	_, err = c.Post(requestUrl.String(), contentType, reqBody)
+	_, err = c.Post(requestUrl.String(), contentType, body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	c.QueryParam.Term = term // set term for future queries
+
+	return &c, nil
 }
