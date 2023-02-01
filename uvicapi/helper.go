@@ -1,4 +1,4 @@
-package client
+package uvicapi
 
 import "net/url"
 

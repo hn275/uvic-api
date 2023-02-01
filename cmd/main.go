@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hn275/uvic-api/uvicapi"
 	"github.com/valyala/fastjson"
 )
 
@@ -22,6 +23,25 @@ func main() {
 
 	startTime := time.Now()
 	log.Printf("fetching uvic data for term %s\n", TERM)
+	uvicClient, err := uvicapi.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	uvicClient.SetTerm("202301")
+
+	jsonResponse, err := uvicClient.GetSections("202301", 1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.WriteFile("./data.json", jsonResponse, 0666); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal("DONE")
+
+	// Aomi's code below
 
 	jar, err := cookiejar.New(nil)
 	if err != nil {
@@ -29,7 +49,8 @@ func main() {
 	}
 	c := http.Client{Jar: jar}
 
-	startSession(&c)
+	startSession(&c) // -> client.SetTerm()
+	// refactored above
 
 	i := 0
 	sections := make([]JSONValue, 0)
