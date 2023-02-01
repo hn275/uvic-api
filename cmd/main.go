@@ -23,21 +23,50 @@ func main() {
 
 	startTime := time.Now()
 	log.Printf("fetching uvic data for term %s\n", TERM)
-	uvicClient, err := uvicapi.NewClient()
+	uvicClient, err := uvicapi.NewAPI("202301")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	uvicClient.SetTerm("202301")
+	/*
+		jsonResponse, err := uvicClient.GetAllSections(1)
+		if err != nil {
+		log.Fatal(err)
+		}
 
-	jsonResponse, err := uvicClient.GetSections("202301", 1)
+		os.WriteFile("./example_meta.json", jsonResponse, 0666)
+
+		jsonValue, err := fastjson.ParseBytes(jsonResponse)
+		if err != nil {
+		log.Fatal(err)
+		}
+
+		data := jsonValue.Get("data")
+		if data == nil {
+		log.Fatal("no data found")
+		}
+
+		os.WriteFile("./example_data.json", data.MarshalTo(nil), 0666)
+
+		crnRes, err := uvicClient.GetCourseDesc("20747")
+		if err != nil {
+		log.Fatal(err)
+		}
+		log.Fatal(string(crnRes))
+	*/
+
+	q := uvicapi.UVicQueryParams{
+		Subject: "MATH",
+		Max:     10,
+		Offset:  0,
+	}
+
+	res, err := uvicClient.GetSection(q)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.WriteFile("./data.json", jsonResponse, 0666); err != nil {
-		log.Fatal(err)
-	}
+	log.Println(string(res))
 
 	log.Fatal("DONE")
 
