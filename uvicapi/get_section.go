@@ -6,7 +6,6 @@ import (
 	"strconv"
 )
 
-/* [WIP] */
 func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error) {
 	getUrl, err := url.Parse(BASE + "searchResults/searchResults")
 	if err != nil {
@@ -27,8 +26,6 @@ func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error) {
 
 	setQuery(getUrl, q)
 
-	// log.Fatal(getUrl.String())
-
 	res, err := (*c).Get(getUrl.String())
 	if err != nil {
 		return nil, err
@@ -36,7 +33,6 @@ func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error) {
 	defer res.Body.Close()
 
 	var buf bytes.Buffer
-
 	if _, err := buf.ReadFrom(res.Body); err != nil {
 		return nil, err
 	}
