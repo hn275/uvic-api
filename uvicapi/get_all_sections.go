@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Get all sections of all classes, 500 entries per page, offset is required
 func (c *UVicAPI) GetAllSections(offset int) ([]byte, error) {
 	reqUrl, err := url.Parse(BASE + "searchResults/searchResults")
 	if err != nil {

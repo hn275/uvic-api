@@ -8,15 +8,12 @@ import (
 	"github.com/hn275/uvic-api/uvicapi"
 )
 
-const BASE = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
-const MAX_SIZE = 500
-const TERM = "202301"
-
 func main() {
-
 	startTime := time.Now()
-	log.Printf("fetching uvic data for term %s\n", TERM)
-	uvicClient, err := uvicapi.NewAPI("202301")
+
+	term := "202301"
+	log.Printf("fetching uvic data for term %s\n", term)
+	uvicClient, err := uvicapi.NewAPI(term)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,10 +21,11 @@ func main() {
 	// GetSection
 	{
 		q := uvicapi.UVicQueryParams{
-			Subject: "MATH",
-			Max:     100,
-			Offset:  0,
-			Term:    "202209",
+			Subject:      "MATH",
+			CourseNumber: "101",
+			Max:          100,
+			Offset:       0,
+			Term:         "202209",
 		}
 
 		res, err := uvicClient.GetSection(q)
@@ -50,11 +48,11 @@ func main() {
 
 	// GetCourseDesc
 	{
-		crnRes, err := uvicClient.GetCourseDesc("20747") // wtf?
+		res, err := uvicClient.GetCourseDesc("20747") // wtf?
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println(string(crnRes)) // huh?
+		log.Println(string(res)) // huh?
 		log.Printf("DONE [GetCourseDesc] in %v\n", time.Since(startTime))
 	}
 
