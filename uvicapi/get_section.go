@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// NOTE:
+// ignoring `queryParams.Term`, since UVic server won't sent back anything that's
+// not in the term set by session (called in `NewAPI(term string)`)
 func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error) {
 	getUrl, err := url.Parse(BASE + "searchResults/searchResults")
 	if err != nil {
