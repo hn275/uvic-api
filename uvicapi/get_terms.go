@@ -25,7 +25,6 @@ func (c *UVicAPI) GetTerms(offset, max int) ([]byte, error) {
 	defer res.Body.Close()
 
 	var buf bytes.Buffer
-
 	if _, err := buf.ReadFrom(res.Body); err != nil {
 		return nil, err
 	}
