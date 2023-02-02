@@ -28,47 +28,55 @@ func main() {
 		log.Fatal(err)
 	}
 
-	/*
-		jsonResponse, err := uvicClient.GetAllSections(1)
+	// GetSection
+	{
+		q := uvicapi.UVicQueryParams{
+			Subject: "MATH",
+			Max:     100,
+			Offset:  0,
+			Term:    "202209",
+		}
+
+		res, err := uvicClient.GetSection(q)
 		if err != nil {
-		log.Fatal(err)
+			log.Fatal(err)
 		}
-
-		os.WriteFile("./example_meta.json", jsonResponse, 0666)
-
-		jsonValue, err := fastjson.ParseBytes(jsonResponse)
-		if err != nil {
-		log.Fatal(err)
-		}
-
-		data := jsonValue.Get("data")
-		if data == nil {
-		log.Fatal("no data found")
-		}
-
-		os.WriteFile("./example_data.json", data.MarshalTo(nil), 0666)
-
-		crnRes, err := uvicClient.GetCourseDesc("20747")
-		if err != nil {
-		log.Fatal(err)
-		}
-		log.Fatal(string(crnRes))
-	*/
-
-	q := uvicapi.UVicQueryParams{
-		Subject: "MATH",
-		Max:     10,
-		Offset:  0,
+		os.WriteFile("./json_examples/GetSection.json", res, 0666)
+		log.Printf("DONE [GetSection] in %v\n", time.Since(startTime))
 	}
 
-	res, err := uvicClient.GetSection(q)
-	if err != nil {
-		log.Fatal(err)
+	// GetAllSections
+	{
+		res, err := uvicClient.GetAllSections(1)
+		if err != nil {
+			log.Fatal(err)
+		}
+		os.WriteFile("./json_examples/GetAllSections.json", res, 0666)
+		log.Printf("DONE [GetAllSections] in %v\n", time.Since(startTime))
 	}
 
-	log.Println(string(res))
+	// GetCourseDesc
+	{
+		crnRes, err := uvicClient.GetCourseDesc("20747") // wtf?
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(string(crnRes)) // huh?
+		log.Printf("DONE [GetCourseDesc] in %v\n", time.Since(startTime))
+	}
 
-	log.Fatal("DONE")
+	// GetTerms
+	{
+		res, err := uvicClient.GetTerms(1, 500)
+
+		if err != nil {
+			panic(err)
+		}
+		os.WriteFile("./json_examples/GetTerms.json", res, 0666)
+		log.Printf("DONE [GetTerms] in %v\n", time.Since(startTime))
+	}
+
+	log.Fatalf("DONE in %v\n", time.Since(startTime))
 
 	// Aomi's code below
 
@@ -129,8 +137,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	timeElapsed := time.Since(startTime)
-	log.Printf("done in %v", timeElapsed)
 }
 
 func getURL(c *http.Client, path string, query map[string]string) ([]byte, error) {
