@@ -1,18 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"log"
-	"net/http"
-	"net/http/cookiejar"
-	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/hn275/uvic-api/uvicapi"
-	"github.com/valyala/fastjson"
 )
 
 const BASE = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
@@ -77,17 +70,28 @@ func main() {
 	}
 
 	log.Fatalf("DONE in %v\n", time.Since(startTime))
+}
 
-	// Aomi's code below
+/* Aomi's code below: to fetch literally everything
+func main() {
+	log := log.New(os.Stderr, "", 0)
+
+	if len(os.Args) != 2 {
+		log.Fatalf(""+
+			"Usage: %v <TERM>\n"+
+			"TERM is of the form YYYYMM, like 202205\n",
+			os.Args[0])
+	}
 
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	c := http.Client{Jar: jar}
+	c := &http.Client{Jar: jar}
 
-	startSession(&c) // -> client.SetTerm()
-	// refactored above
+	postURL(c, "term/search", map[string]string{
+		"mode": "search",
+	}, "application/x-www-form-urlencoded", "term="+os.Args[1])
 
 	i := 0
 	sections := make([]JSONValue, 0)
@@ -95,9 +99,9 @@ func main() {
 
 	log.Printf("\rProgress: %v/%v", 0, totalSectionCount)
 	for {
-		b, err := getURL(&c, "searchResults/searchResults", map[string]string{
-			"txt_term":    TERM,
-			"pageOffset":  strconv.Itoa(i * MAX_SIZE),
+		b, err := getURL(c, "searchResults/searchResults", map[string]string{
+			"txt_term":    os.Args[1],
+			"pageOffset":  strconv.Itoa(i * maxSize),
 			"pageMaxSize": "500",
 		})
 		if err != nil {
@@ -112,7 +116,6 @@ func main() {
 		}
 
 		totalSectionCount := strconv.Itoa(jsonResponse.GetInt("sectionsFetchedCount"))
-		// TODO: since i get this right here, the following request should be in go routine
 
 		data := jsonResponse.Get("data").GetArray()
 		count := len(data)
@@ -132,12 +135,67 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println(string(b))
 
-	if err := os.WriteFile("./data.json", b, 0666); err != nil {
-		log.Fatal(err)
+	os.WriteFile("./data.json", b, 0666)
+}
+
+func getURL(c *http.Client, path string, query map[string]string) ([]byte, error) {
+	reqURL, err := url.Parse(baseURL + path)
+	if err != nil {
+		return nil, err
 	}
 
+	setQuery(reqURL, query)
+
+	resp, err := c.Get(reqURL.String())
+	if err != nil {
+		return nil, err
+	}
+
+	b := readBody(resp)
+	return b, nil
 }
+
+func postURL(c *http.Client, path string, query map[string]string, contentType string, body string) ([]byte, error) {
+	reqURL, err := url.Parse(baseURL + path)
+	if err != nil {
+		return nil, err
+	}
+
+	setQuery(reqURL, query)
+
+	resp, err := c.Post(reqURL.String(), contentType, bytes.NewBufferString(body))
+	if err != nil {
+		return nil, err
+	}
+
+	b := readBody(resp)
+	return b, nil
+}
+
+func readBody(resp *http.Response) []byte {
+	b := bytes.Buffer{}
+	b.ReadFrom(resp.Body)
+	return b.Bytes()
+}
+
+func setQuery(u *url.URL, query map[string]string) {
+	out := make(url.Values)
+	for k, v := range query {
+		out[k] = []string{v}
+	}
+	u.RawQuery = out.Encode()
+}
+
+// because fastjson does't implement json.Marshaller
+type JSONValue struct {
+	Value *fastjson.Value
+}
+
+func (j *JSONValue) MarshalJSON() ([]byte, error) {
+	return j.Value.MarshalTo(nil), nil
+}}
 
 func getURL(c *http.Client, path string, query map[string]string) ([]byte, error) {
 	reqURL, err := url.Parse(BASE + path)
@@ -196,3 +254,4 @@ type JSONValue struct {
 func (j *JSONValue) MarshalJSON() ([]byte, error) {
 	return j.Value.MarshalTo(nil), nil
 }
+*/
