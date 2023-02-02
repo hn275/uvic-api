@@ -1,7 +1,6 @@
 package uvicapi
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -17,7 +16,7 @@ type UVicQueryParams struct {
 	Term         string // ie: "202301"
 	CourseNumber string // ie: "225"
 	Offset       int
-	Max          int // ie: max 500
+	Max          int // max 500
 }
 
 type UVicAPIError struct {
@@ -44,10 +43,7 @@ func NewAPI(term string) (*UVicAPI, error) {
 
 	setQuery(requestUrl, map[string]string{"mode": "search"})
 
-	contentType := "application/x-www-form-urlencoded"
-	body := bytes.NewBufferString("term=" + term)
-
-	_, err = c.Post(requestUrl.String(), contentType, body)
+	_, err = c.PostForm(requestUrl.String(), url.Values{"term": []string{term}})
 	if err != nil {
 		return nil, err
 	}
