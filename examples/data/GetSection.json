@@ -37,7 +37,7 @@
       "faculty": 
       [
         {
-          "bannerId": "3604",
+          "bannerId": "6339",
           "category": null,
           "class": "net.hedtech.banner.student.faculty.FacultyResultDecorator",
           "courseReferenceNumber": "21983",
@@ -125,7 +125,7 @@
       "faculty": 
       [
         {
-          "bannerId": "3605",
+          "bannerId": "6340",
           "category": null,
           "class": "net.hedtech.banner.student.faculty.FacultyResultDecorator",
           "courseReferenceNumber": "21984",
@@ -213,7 +213,7 @@
       "faculty": 
       [
         {
-          "bannerId": "3606",
+          "bannerId": "6341",
           "category": null,
           "class": "net.hedtech.banner.student.faculty.FacultyResultDecorator",
           "courseReferenceNumber": "21985",
@@ -301,7 +301,7 @@
       "faculty": 
       [
         {
-          "bannerId": "3606",
+          "bannerId": "6341",
           "category": null,
           "class": "net.hedtech.banner.student.faculty.FacultyResultDecorator",
           "courseReferenceNumber": "21986",
@@ -389,7 +389,7 @@
       "faculty": 
       [
         {
-          "bannerId": "3605",
+          "bannerId": "6340",
           "category": null,
           "class": "net.hedtech.banner.student.faculty.FacultyResultDecorator",
           "courseReferenceNumber": "24073",
