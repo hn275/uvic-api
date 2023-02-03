@@ -32,8 +32,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.WriteFile("./json_examples/GetSection.json", res, 0666)
-		log.Printf("DONE [GetSection] in %v\n", time.Since(startTime))
+		if err := os.WriteFile("./data/GetSection.json", res, 0666); err != nil {
+			log.Printf("ERROR [GetSection]:\n%v\n", time.Since(startTime))
+		} else {
+			log.Printf("DONE [GetSection] in %v\n", time.Since(startTime))
+		}
 	}
 
 	// GetAllSections
@@ -42,17 +45,19 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.WriteFile("./json_examples/GetAllSections.json", res, 0666)
-		log.Printf("DONE [GetAllSections] in %v\n", time.Since(startTime))
+		if err := os.WriteFile("./data/GetAllSections.json", res, 0666); err != nil {
+			log.Printf("ERROR [GetAllSections]:\n%v\n", time.Since(startTime))
+		} else {
+			log.Printf("DONE [GetAllSections] in %v\n", time.Since(startTime))
+		}
 	}
 
 	// GetCourseDesc
 	{
-		res, err := uvicClient.GetCourseDesc("20747") // wtf?
+		_, err := uvicClient.GetCourseDesc("20747") // wtf?
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println(string(res)) // huh?
 		log.Printf("DONE [GetCourseDesc] in %v\n", time.Since(startTime))
 	}
 
@@ -63,8 +68,24 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		os.WriteFile("./json_examples/GetTerms.json", res, 0666)
-		log.Printf("DONE [GetTerms] in %v\n", time.Since(startTime))
+		if err := os.WriteFile("./data/GetTerms.json", res, 0666); err != nil {
+			log.Printf("ERROR [GetTerms]:\n%v", err)
+		} else {
+			log.Printf("DONE [GetTerms] in %v\n", time.Since(startTime))
+		}
+	}
+
+	// GetAllCourses
+	{
+		res, err := uvicClient.GetAllCourses()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := os.WriteFile("./data/GetAllCourses.json", res, 0666); err != nil {
+			log.Printf("ERROR [GetAllCourses]:\n%v", err)
+		} else {
+			log.Printf("DONE [GetAllCourses] in %v\n", time.Since(startTime))
+		}
 	}
 
 	log.Fatalf("DONE in %v\n", time.Since(startTime))
