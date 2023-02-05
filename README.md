@@ -8,7 +8,7 @@ functions that would be required to get data from UVic Banner.
 
 ## banner.uvic.ca
 
-- Before any fetching can be performed, the term has to be set. This is done by calling the `NewAPI`
+- Before any fetching can be performed, the term has to be set. This is done by calling the `NewAPI`.
 
   ```go
   u, err := uvicapi.NewAPI("202301") // winter term 2023
@@ -32,7 +32,7 @@ functions that would be required to get data from UVic Banner.
 
 ## API References
 
-Examples can be found in this [implementation](./examples/main.go)
+[Implementations](./examples/main.go).
 
 ### ToC
 
@@ -66,7 +66,7 @@ type UVicQueryParams struct {
 }
 ```
 
-- Note that the term is not set here, see `NewAPI`
+- Note that the term is not set here, see `NewAPI`.
 
 #### NewAPI
 
