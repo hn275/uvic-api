@@ -13,7 +13,7 @@ func main() {
 	term := "202301"
 
 	log.Printf("fetching uvic data for term %s\n", term)
-	uvicClient, err := uvicapi.NewAPI(term)
+	uvic, err := uvicapi.NewAPI(term)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func main() {
 			Offset:       0,
 		}
 
-		res, err := uvicClient.GetSection(q)
+		res, err := uvic.GetSection(q)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -37,7 +37,7 @@ func main() {
 
 	// GetAllSections
 	{
-		res, err := uvicClient.GetAllSections(1)
+		res, err := uvic.GetAllSections(1)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -47,7 +47,7 @@ func main() {
 
 	// GetCourseDesc
 	{
-		_, err := uvicClient.GetCourseDesc("20747") // wtf?
+		_, err := uvic.GetCourseDesc("20747") // wtf?
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -56,7 +56,7 @@ func main() {
 
 	// GetTerms
 	{
-		res, err := uvicClient.GetTerms()
+		res, err := uvic.GetTerms()
 
 		if err != nil {
 			panic(err)
@@ -67,7 +67,7 @@ func main() {
 
 	// GetAllCourses
 	{
-		res, err := uvicClient.GetAllCourses()
+		res, err := uvic.GetAllCourses()
 		if err != nil {
 			log.Fatal(err)
 		}
