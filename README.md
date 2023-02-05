@@ -30,6 +30,86 @@ functions that would be required to get data from UVic Banner.
   })
   ```
 
-## API
+## API References
 
-Examples can be found in [example](./examples/)
+Examples can be found in this [implementation](./examples/main.go)
+
+### ToC
+
+[type UVicAPI](#uvicapi)
+
+- [func NewAPI](#newapi)
+- [func (c \*UVicAPI) GetTerms](#getterms)
+- [func (c \*UVicAPI) GetSection](#getsection)
+- [func (c \*UVicAPI) GetAllSections](#getallsections)
+- [func (c \*UVicAPI) GetAllSections](#getallcourses)
+
+[type UVicQueryParams](#uvicqueryparams)
+
+#### UVicAPI
+
+```go
+type UVicAPI struct{
+  http.Client
+  Term string
+}
+```
+
+#### UVicQueryParams
+
+```go
+type UVicQueryParams struct {
+  Subject      string
+  CourseNumber string
+  Offset       int
+  Max          int
+}
+```
+
+- Note that the term is not set here, see `NewAPI`
+
+#### NewAPI
+
+```go
+func NewAPI(term string) (*UVicAPI, error)
+```
+
+- Returns an instance of `UVicAPI`.
+- This method also capture the cookie set by Banner for the querying term.
+  All the subsequent queries will be in the scope of the set term.
+
+#### GetTerms
+
+```go
+func (c *UVicAPI) GetTerms() ([]byte, error)
+```
+
+- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetTerms.json)
+
+#### GetSection
+
+```go
+func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error)
+```
+
+- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetSection.json)
+
+#### GetCourseDesc (wip)
+
+#### GetAllSections
+
+```go
+func (c *UVicAPI) GetAllSections(offset int) ([]byte, error)
+```
+
+- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetAllSections.json)
+- Banner "paginates" the response for this, each page can contain up to 500 entries, think of the `offset` param
+  like page number.
+
+#### GetAllCourses
+
+```go
+func (c *UVicAPI) GetAllCourses() ([]byte, error)
+```
+
+- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetAllCourses.json)
