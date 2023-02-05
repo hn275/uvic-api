@@ -6,12 +6,17 @@ where students can use to manage registeration, class lookups, etc..
 While this package cannot perform any action for the student, it abstracts a lot of the fetching
 functions that would be required to get data from UVic Banner.
 
+## Quick note
+
+Special thanks to [Aomi](https://github.com/aomi), he saved me a lot of time and headache with his
+infinite Banner wisdom.
+
 ## banner.uvic.ca
 
 - Before any fetching can be performed, the term has to be set. This is done by calling the `NewAPI`.
 
   ```go
-  u, err := uvicapi.NewAPI("202301") // winter term 2023
+  uvic, err := uvicapi.NewAPI("202301") // winter term 2023
   ```
 
   - This function captured the session cookies set by Banner, it is important to note that
@@ -22,7 +27,7 @@ functions that would be required to get data from UVic Banner.
 
   ```go
   // GetSection
-  res, err := u.GetSection(uvicapi.UVicQueryParams{
+  res, err := uvic.GetSection(uvicapi.UVicQueryParams{
       Subject:      "CSC",
       CourseNumber: "225",
       Max:          500, // max entries
@@ -42,7 +47,7 @@ functions that would be required to get data from UVic Banner.
 - [func (c \*UVicAPI) GetTerms](#getterms)
 - [func (c \*UVicAPI) GetSection](#getsection)
 - [func (c \*UVicAPI) GetAllSections](#getallsections)
-- [func (c \*UVicAPI) GetAllSections](#getallcourses)
+- [func (c \*UVicAPI) GetAllCourses](#getallcourses)
 
 [type UVicQueryParams](#uvicqueryparams)
 
@@ -81,35 +86,35 @@ func NewAPI(term string) (*UVicAPI, error)
 #### GetTerms
 
 ```go
-func (c *UVicAPI) GetTerms() ([]byte, error)
+func (u *UVicAPI) GetTerms() ([]byte, error)
 ```
 
-- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetTerms.json)
+- Returns the **json encoding** fetched from banner. See the [json](./examples/data/GetTerms.json).
 
 #### GetSection
 
 ```go
-func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error)
+func (u *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error)
 ```
 
-- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetSection.json)
+- Returns the **json encoding** fetched from banner. See the [json](./examples/data/GetSection.json).
 
 #### GetCourseDesc (wip)
 
 #### GetAllSections
 
 ```go
-func (c *UVicAPI) GetAllSections(offset int) ([]byte, error)
+func (u *UVicAPI) GetAllSections(offset int) ([]byte, error)
 ```
 
-- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetAllSections.json)
+- Returns the **json encoding** fetched from banner. See the [json](./examples/data/GetAllSections.json).
 - Banner "paginates" the response for this, each page can contain up to 500 entries, think of the `offset` param
   like page number.
 
 #### GetAllCourses
 
 ```go
-func (c *UVicAPI) GetAllCourses() ([]byte, error)
+func (u *UVicAPI) GetAllCourses() ([]byte, error)
 ```
 
-- Returns the **json encoding** fetched from banner. See [examples](./examples/data/GetAllCourses.json)
+- Returns the **json encoding** fetched from banner. See [json](./examples/data/GetAllCourses.json).
