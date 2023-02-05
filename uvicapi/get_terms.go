@@ -3,10 +3,9 @@ package uvicapi
 import (
 	"bytes"
 	"net/url"
-	"strconv"
 )
 
-func (c *UVicAPI) GetTerms(offset, max int) ([]byte, error) {
+func (c *UVicAPI) GetTerms() ([]byte, error) {
 	u, err := url.Parse(BASE + "/classSearch/getTerms")
 	if err != nil {
 		return nil, err
@@ -14,8 +13,8 @@ func (c *UVicAPI) GetTerms(offset, max int) ([]byte, error) {
 
 	setQuery(u, map[string]string{
 		"searchTerms": "",
-		"offset":      strconv.Itoa(offset),
-		"max":         strconv.Itoa(max),
+		"offset":      "0",
+		"max":         "500",
 	})
 
 	res, err := c.Get(u.String())
