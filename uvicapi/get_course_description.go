@@ -6,7 +6,7 @@ import (
 )
 
 func (c *UVicAPI) GetCourseDesc(crn string) ([]byte, error) {
-	u, err := url.Parse(BASE + "searchResults/getCourseDescription")
+	u, err := url.Parse(banner + "searchResults/getCourseDescription")
 	if err != nil {
 		return nil, err
 	}

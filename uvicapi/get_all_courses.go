@@ -13,8 +13,10 @@ type Course struct {
 	Title string `json:"title"`
 }
 
+const kuali string = "https://uvic.kuali.co/api/v1/catalog/courses/5d9ccc4eab7506001ae4c225"
+
 func (c *UVicAPI) GetAllCourses() ([]byte, error) {
-	res, err := http.Get("https://uvic.kuali.co/api/v1/catalog/courses/5d9ccc4eab7506001ae4c225")
+	res, err := http.Get(kuali)
 	if err != nil {
 		return nil, err
 	}

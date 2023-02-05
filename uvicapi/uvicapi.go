@@ -18,8 +18,7 @@ type UVicQueryParams struct {
 	Max          int // max 500
 }
 
-const BASE = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
-const MAX_SIZE = 0
+const banner = "https://banner.uvic.ca/StudentRegistrationSsb/ssb/"
 
 func NewAPI(term string) (*UVicAPI, error) {
 	cookieJar, err := cookiejar.New(nil)
@@ -30,7 +29,7 @@ func NewAPI(term string) (*UVicAPI, error) {
 	var c UVicAPI
 	c.Jar = cookieJar
 
-	requestUrl, err := url.Parse(BASE + "term/search")
+	requestUrl, err := url.Parse(banner + "term/search")
 	if err != nil {
 		return nil, err
 	}

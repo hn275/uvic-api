@@ -6,7 +6,7 @@ import (
 )
 
 func (c *UVicAPI) GetTerms() ([]byte, error) {
-	u, err := url.Parse(BASE + "/classSearch/getTerms")
+	u, err := url.Parse(banner + "/classSearch/getTerms")
 	if err != nil {
 		return nil, err
 	}
