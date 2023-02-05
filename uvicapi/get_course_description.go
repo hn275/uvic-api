@@ -12,7 +12,7 @@ func (c *UVicAPI) GetCourseDesc(crn string) ([]byte, error) {
 	}
 
 	body := url.Values{
-		"term":                  []string{c.QueryParam.Term},
+		"term":                  []string{c.Term},
 		"courseReferenceNumber": []string{crn},
 	}
 

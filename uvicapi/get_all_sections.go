@@ -14,7 +14,7 @@ func (c *UVicAPI) GetAllSections(offset int) ([]byte, error) {
 	}
 
 	setQuery(reqUrl, map[string]string{
-		"txt_term":    (*c).QueryParam.Term,
+		"txt_term":    c.Term,
 		"pageOffset":  strconv.Itoa((offset) * MAX_SIZE),
 		"pageMaxSize": strconv.Itoa(MAX_SIZE),
 	})

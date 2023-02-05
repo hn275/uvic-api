@@ -17,7 +17,7 @@ func (c *UVicAPI) GetSection(queryParams UVicQueryParams) ([]byte, error) {
 
 	q := map[string]string{
 		"txt_subject":      queryParams.Subject,
-		"txt_term":         c.QueryParam.Term,
+		"txt_term":         c.Term,
 		"txt_courseNumber": queryParams.CourseNumber,
 		"startDatepicker":  "",
 		"endDatepicker":    "",
